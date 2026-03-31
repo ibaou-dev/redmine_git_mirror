@@ -1,0 +1,10 @@
+<h2><%= l(:label_git_mirror_edit) %></h2>
+
+<%= form_for @config, url: git_mirror_config_path(@project, @repository, @config),
+             html: { method: :patch } do |f| %>
+  <%= render partial: 'form', locals: { f: f } %>
+  <p>
+    <%= submit_tag l(:button_save) %>
+    <%= link_to l(:button_cancel), settings_project_path(@project, tab: 'repositories') %>
+  </p>
+<% end %>

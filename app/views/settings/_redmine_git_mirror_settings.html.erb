@@ -1,0 +1,10 @@
+<p>
+  <label for="settings_git_mirror_base_dir">
+    <%= l(:label_git_mirror_base_dir) %>
+  </label>
+  <%= text_field_tag 'settings[git_mirror_base_dir]',
+                     Setting.plugin_redmine_git_mirror['git_mirror_base_dir'],
+                     size: 60,
+                     id:   'settings_git_mirror_base_dir' %>
+  <em class="info"><%= l(:label_git_mirror_base_dir_hint) %></em>
+</p>

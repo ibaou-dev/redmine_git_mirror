@@ -1,0 +1,55 @@
+<h2><%= l(:label_git_mirror_sync_log) %></h2>
+
+<table class="attributes">
+  <tbody>
+    <tr>
+      <th><%= l(:label_remote_url) %></th>
+      <td><code><%= h @config.remote_url %></code></td>
+    </tr>
+    <tr>
+      <th><%= l(:field_created_on) %></th>
+      <td><%= format_time(@log.started_at) %></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_sync_status) %></th>
+      <td>
+        <span class="git-mirror-badge git-mirror-badge-<%= @log.status %>">
+          <%= l(:"label_sync_status_#{@log.status}", default: @log.status.humanize) %>
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <th><%= l(:label_trigger_type_scheduler).sub('Scheduler', 'Trigger') %></th>
+      <td>
+        <span class="git-mirror-badge git-mirror-badge-trigger-<%= @log.trigger_type %>">
+          <%= l(:"label_trigger_type_#{@log.trigger_type}", default: @log.trigger_type.humanize) %>
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <th><%= l(:label_sync_duration) %></th>
+      <td><%= @log.duration_seconds ? "#{@log.duration_seconds}s" : '—' %></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_commits_fetched) %></th>
+      <td><%= @log.commits_fetched %></td>
+    </tr>
+    <% if @log.error_message.present? %>
+      <tr>
+        <th><%= l(:label_sync_error) %></th>
+        <td class="git-mirror-error"><%= h @log.error_message %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @log.output.present? %>
+  <h3><%= l(:label_sync_output) %></h3>
+  <pre class="git-mirror-output"><%= h @log.output %></pre>
+<% end %>
+
+<p>
+  <%= link_to l(:button_back),
+              git_mirror_sync_logs_path(@project, git_mirror_config_id: @config.id),
+              class: 'icon icon-back' %>
+</p>

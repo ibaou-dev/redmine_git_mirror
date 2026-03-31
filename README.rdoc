@@ -1,0 +1,41 @@
+= Redmine Git Mirror Plugin
+
+Enhances Redmine's Git repository integration with:
+* Automatic remote repository mirroring (clone + fetch)
+* Secure credential storage: SSH keys, access tokens, username/password
+* Per-repository configurable polling schedules (cron format)
+* Webhook support for push-based sync (GitHub, GitLab, Bitbucket)
+* Full sync audit log
+* Admin dashboard
+
+== Installation
+
+1. Copy or clone this plugin into <redmine>/plugins/redmine_git_mirror/
+2. Run: bundle install
+3. Run: bundle exec rake redmine:plugins:migrate NAME=redmine_git_mirror RAILS_ENV=production
+4. Restart Redmine
+
+== Configuration
+
+1. Go to Administration > Plugins > Redmine Git Mirror > Configure
+2. Set the mirror base directory (optional, defaults to <redmine_root>/repositories/redmine_git_mirror)
+3. Enable the "Git Mirror" module in your project settings
+4. In Project Settings > Repositories, configure a Git repository, then click "Configure Mirror"
+
+== Webhook Setup
+
+After creating a mirror configuration, copy the displayed Webhook URL and configure it
+in your Git host (GitHub/GitLab/Bitbucket) as a push webhook. Optionally configure the
+webhook secret for HMAC signature verification.
+
+== Security Notes
+
+* SSH private keys are stored on the filesystem with mode 0600, never in the database
+* Access tokens and passwords are encrypted using Redmine's built-in AES-256-CBC cipher
+* Webhook secrets are encrypted in the database
+* Webhook HMAC-SHA256 verification prevents unauthorized sync triggers
+* Rate limiting (60 requests/minute per repo/IP) protects the webhook endpoint
+
+== License
+
+This plugin is open source and released under the terms of the GNU General Public License v2 (GPL).
