@@ -32,7 +32,7 @@
           <td><%= project ? link_to(project.name, project_path(project)) : '—' %></td>
           <td>
             <% if repo && project %>
-              <%= link_to(repo.name, project_repository_path(project, repo)) %>
+              <%= link_to(repo.name, url_for(controller: 'repositories', action: 'show', project_id: project, id: repo.identifier)) %>
             <% else %>
               —
             <% end %>

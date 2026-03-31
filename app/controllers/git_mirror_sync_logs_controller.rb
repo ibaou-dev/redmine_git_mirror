@@ -15,12 +15,11 @@ class GitMirrorSyncLogsController < ApplicationController
 
     scope = scope.where(status: params[:status]) if params[:status].present?
 
-    @limit      = per_page_option
+    @limit       = per_page_option
     @entry_count = scope.count
-    @page_count  = (@entry_count / @limit.to_f).ceil
-    @page        = params[:page].to_i.clamp(1, [@page_count, 1].max)
+    @entry_pages = Redmine::Pagination::Paginator.new(@entry_count, @limit, params['page'])
 
-    @logs = scope.limit(@limit).offset((@page - 1) * @limit)
+    @logs = scope.limit(@limit).offset(@entry_pages.offset)
   end
 
   def show

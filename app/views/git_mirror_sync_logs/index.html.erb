@@ -51,6 +51,5 @@
     </tbody>
   </table>
 
-  <%= pagination_links_full @page, @page_count, @limit,
-                            params: request.query_parameters %>
+  <%= pagination_links_full @entry_pages, @entry_count %>
 <% end %>
