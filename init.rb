@@ -46,10 +46,10 @@ require_relative 'lib/redmine_git_mirror/hooks/view_layouts_base_html_head_hook'
 require_relative 'lib/redmine_git_mirror/patches/repository_git_patch'
 require_relative 'lib/redmine_git_mirror/patches/projects_helper_patch'
 
-Rails.application.config.to_prepare do
-  Repository::Git.send(:include, RedmineGitMirror::Patches::RepositoryGitPatch)   unless Repository::Git.include?(RedmineGitMirror::Patches::RepositoryGitPatch)
-  ProjectsHelper.send(:include, RedmineGitMirror::Patches::ProjectsHelperPatch)   unless ProjectsHelper.include?(RedmineGitMirror::Patches::ProjectsHelperPatch)
-end
+# init.rb is loaded inside Redmine::PluginLoader's to_prepare block, so patches
+# applied here run before each request (development) or once at boot (production).
+Repository::Git.send(:include, RedmineGitMirror::Patches::RepositoryGitPatch)   unless Repository::Git.include?(RedmineGitMirror::Patches::RepositoryGitPatch)
+ProjectsHelper.send(:include, RedmineGitMirror::Patches::ProjectsHelperPatch)   unless ProjectsHelper.include?(RedmineGitMirror::Patches::ProjectsHelperPatch)
 
 Rails.application.config.after_initialize do
   next if Rails.env.test?

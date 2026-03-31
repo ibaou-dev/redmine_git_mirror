@@ -1,7 +1,6 @@
 class GitMirrorConfigsController < ApplicationController
   before_action :find_project_by_project_id
   before_action :authorize
-  before_action :find_repository,    only: [:edit, :update, :destroy, :trigger_sync]
   before_action :find_config,        only: [:edit, :update, :destroy, :trigger_sync]
 
   def new
@@ -92,14 +91,13 @@ class GitMirrorConfigsController < ApplicationController
   private
   # -----------------------------------------------------------------------
 
-  def find_repository
-    @repository = Repository.find_by(id: params[:repository_id], project_id: @project.id)
-    render_404 unless @repository
-  end
-
   def find_config
-    @config = GitMirrorConfig.find_by(id: params[:id], repository_id: @repository.id)
-    render_404 unless @config
+    @config = GitMirrorConfig.find_by(id: params[:id])
+    if @config.nil? || @config.repository.nil? || @config.repository.project_id != @project.id
+      render_404
+      return
+    end
+    @repository = @config.repository
   end
 
   def handle_ssh_key_upload

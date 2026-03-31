@@ -1,6 +1,6 @@
 <h2><%= l(:label_git_mirror_edit) %></h2>
 
-<%= form_for @config, url: git_mirror_config_path(@project, @repository, @config),
+<%= form_for @config, url: git_mirror_config_path(@project, @config),
              html: { method: :patch } do |f| %>
   <%= render partial: 'form', locals: { f: f } %>
   <p>

@@ -33,13 +33,13 @@
       <% if User.current.allowed_to?(:manage_git_mirror, @project) %>
         <p class="git-mirror-actions">
           <%= link_to l(:label_sync_now),
-                      trigger_sync_git_mirror_config_path(@project, @repository, mirror),
+                      trigger_sync_git_mirror_config_path(@project, mirror),
                       method: :post,
                       class:  'icon icon-reload',
                       data:   { confirm: false } %>
           &nbsp;
           <%= link_to l(:button_edit),
-                      edit_git_mirror_config_path(@project, @repository, mirror),
+                      edit_git_mirror_config_path(@project, mirror),
                       class: 'icon icon-edit' %>
           &nbsp;
           <%= link_to l(:label_git_mirror_sync_logs),

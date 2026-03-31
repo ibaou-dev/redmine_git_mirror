@@ -20,7 +20,7 @@ module RedmineGitMirror
       def instance
         @instance ||= Rufus::Scheduler.new(
           max_work_threads: 4,
-          on_error:         method(:handle_scheduler_error)
+          on_error: ->(job, error) { handle_scheduler_error(job, error) }
         )
       end
 
@@ -37,7 +37,7 @@ module RedmineGitMirror
         end
 
         Rails.logger.info "[RedmineGitMirror::Scheduler] Scheduled #{tag} (#{config.poll_cron})"
-      rescue ArgumentError, Rufus::Scheduler::NotFound => e
+      rescue ArgumentError => e
         Rails.logger.error "[RedmineGitMirror::Scheduler] Invalid cron '#{config.poll_cron}' for config #{config.id}: #{e.message}"
       end
 
@@ -81,10 +81,6 @@ module RedmineGitMirror
         @instance.shutdown(:wait)
         @instance = nil
       end
-
-      # -----------------------------------------------------------------------
-      private
-      # -----------------------------------------------------------------------
 
       def job_tag(config)
         "#{JOB_TAG_PREFIX}#{config.id}"

@@ -30,13 +30,11 @@ module RedmineGitMirror
         available
       end
 
-      private
-
       def available_bytes(path)
         stat = File.statvfs(path)
         stat.block_size * stat.blocks_available
-      rescue NotImplementedError
-        # Fallback for platforms without statvfs (Windows/JRuby)
+      rescue NotImplementedError, NoMethodError
+        # Fallback for platforms without statvfs (Windows/JRuby/some Linux Ruby builds)
         df_output = `df -k #{Shellwords.escape(path)} 2>/dev/null`.lines.last.to_s
         kb_available = df_output.split[3].to_i
         kb_available * 1024

@@ -55,6 +55,8 @@ class GitMirrorWebhookController < ApplicationController
   def rate_limit!
     key   = "redmine_git_mirror:webhook_rate:#{@config.id}:#{request.remote_ip}"
     count = Rails.cache.increment(key, 1, expires_in: 1.minute)
+    return if count.nil?  # cache store doesn't support increment — skip rate limiting
+
     if count > 60
       render json: { error: 'Rate limit exceeded' }, status: :too_many_requests
     end
