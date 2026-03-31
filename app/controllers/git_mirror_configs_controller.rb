@@ -31,6 +31,11 @@ class GitMirrorConfigsController < ApplicationController
     @config.safe_attributes = params[:git_mirror_config]
     @config.repository_id   = @repository.id
 
+    creds = params[:git_mirror_config] || {}
+    @config.access_token = creds[:access_token] if creds[:access_token].present?
+    @config.password     = creds[:password]     if creds[:password].present?
+    @config.username     = creds[:username]     if creds[:username].present?
+
     handle_ssh_key_upload
 
     if @config.save
@@ -47,6 +52,11 @@ class GitMirrorConfigsController < ApplicationController
 
   def update
     @config.safe_attributes = params[:git_mirror_config]
+
+    creds = params[:git_mirror_config] || {}
+    @config.access_token = creds[:access_token] if creds[:access_token].present?
+    @config.password     = creds[:password]     if creds[:password].present?
+    @config.username     = creds[:username]     if creds[:username].present?
 
     handle_ssh_key_upload
     handle_webhook_secret_update

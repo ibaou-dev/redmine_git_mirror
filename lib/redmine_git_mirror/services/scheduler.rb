@@ -52,6 +52,8 @@ module RedmineGitMirror
       # Load all active configs from the DB and (re)schedule their cron jobs.
       # Called once at application boot from init.rb after_initialize.
       def reschedule_all
+        return unless GitMirrorConfig.table_exists?
+
         # Remove all existing mirror cron jobs
         instance.jobs(tag: JOB_TAG_PREFIX).each(&:unschedule)
 
@@ -68,6 +70,8 @@ module RedmineGitMirror
         end
 
         Rails.logger.info "[RedmineGitMirror::Scheduler] Scheduled #{configs.size} mirror job(s)"
+      rescue ActiveRecord::StatementInvalid => e
+        Rails.logger.warn "[RedmineGitMirror::Scheduler] DB not ready, skipping schedule: #{e.message}"
       end
 
       # Shut down the scheduler gracefully (called on process exit if needed).

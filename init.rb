@@ -53,7 +53,7 @@ end
 
 Rails.application.config.after_initialize do
   next if Rails.env.test?
-  next unless defined?(GitMirrorConfig)
+  next unless defined?(GitMirrorConfig) && GitMirrorConfig.table_exists?
 
   RedmineGitMirror::Services::Scheduler.reschedule_all
 end
