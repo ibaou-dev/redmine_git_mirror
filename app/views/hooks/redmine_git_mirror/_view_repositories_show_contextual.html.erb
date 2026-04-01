@@ -1,0 +1,58 @@
+<% if @repository.is_a?(Repository::Git) %>
+  <% mirror = @repository.git_mirror_config %>
+  <% if mirror %>
+    <div id="git-mirror-status" class="git-mirror-status-panel">
+      <h4><%= l(:label_git_mirror) %></h4>
+      <dl>
+        <dt><%= l(:label_remote_url) %></dt>
+        <dd><code><%= h mirror.remote_url %></code></dd>
+
+        <dt><%= l(:label_sync_status) %></dt>
+        <dd>
+          <% status = mirror.stale_sync? ? 'stale' : (mirror.syncing? ? 'running' : mirror.last_sync_status.to_s) %>
+          <span class="git-mirror-badge git-mirror-badge-<%= status %>">
+            <%= l(:"label_sync_status_#{status.presence || 'pending'}", default: status.humanize) %>
+          </span>
+        </dd>
+
+        <dt><%= l(:label_last_sync) %></dt>
+        <dd>
+          <% if mirror.last_sync_at %>
+            <%= format_time(mirror.last_sync_at) %>
+          <% else %>
+            <%= l(:label_last_sync_never) %>
+          <% end %>
+        </dd>
+
+        <% if mirror.poll_enabled? %>
+          <dt><%= l(:label_poll_cron) %></dt>
+          <dd><code><%= h mirror.poll_cron %></code></dd>
+        <% end %>
+      </dl>
+
+      <% if User.current.allowed_to?(:manage_git_mirror, @project) %>
+        <p class="git-mirror-actions">
+          <%= link_to l(:label_sync_now),
+                      trigger_sync_git_mirror_config_path(@project, mirror),
+                      method: :post,
+                      class:  'icon icon-reload',
+                      data:   { confirm: false } %>
+          &nbsp;
+          <%= link_to l(:button_edit),
+                      edit_git_mirror_config_path(@project, mirror),
+                      class: 'icon icon-edit' %>
+          &nbsp;
+          <%= link_to l(:label_git_mirror_sync_logs),
+                      git_mirror_sync_logs_path(@project, git_mirror_config_id: mirror.id),
+                      class: 'icon icon-time' %>
+        </p>
+      <% end %>
+    </div>
+  <% elsif User.current.allowed_to?(:manage_git_mirror, @project) && @project.module_enabled?(:redmine_git_mirror) %>
+    <p>
+      <%= link_to l(:label_git_mirror_new),
+                  new_git_mirror_config_path(@project, repository_id: @repository.id),
+                  class: 'icon icon-add' %>
+    </p>
+  <% end %>
+<% end %>

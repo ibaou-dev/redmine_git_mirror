@@ -1,0 +1,55 @@
+<h2>
+  <%= l(:label_git_mirror_sync_logs) %>
+  <% if @config %>
+    — <code><%= h @config.remote_url %></code>
+  <% end %>
+</h2>
+
+<% if @logs.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <table class="list">
+    <thead>
+      <tr>
+        <th><%= l(:field_created_on) %></th>
+        <th><%= l(:label_trigger_type_scheduler).sub('Scheduler', 'Trigger') %></th>
+        <th><%= l(:label_sync_status) %></th>
+        <th><%= l(:label_sync_duration) %></th>
+        <th><%= l(:label_commits_fetched) %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @logs.each do |log| %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td><%= format_time(log.started_at) %></td>
+          <td>
+            <span class="git-mirror-badge git-mirror-badge-trigger-<%= log.trigger_type %>">
+              <%= l(:"label_trigger_type_#{log.trigger_type}", default: log.trigger_type.humanize) %>
+            </span>
+          </td>
+          <td>
+            <span class="git-mirror-badge git-mirror-badge-<%= log.status %>">
+              <%= l(:"label_sync_status_#{log.status}", default: log.status.humanize) %>
+            </span>
+          </td>
+          <td>
+            <% if log.duration_seconds %>
+              <%= log.duration_seconds %>s
+            <% else %>
+              —
+            <% end %>
+          </td>
+          <td><%= log.commits_fetched %></td>
+          <td>
+            <%= link_to l(:button_view),
+                        git_mirror_sync_log_path(@project, log),
+                        class: 'icon icon-zoom-in' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= pagination_links_full @entry_pages, @entry_count %>
+<% end %>

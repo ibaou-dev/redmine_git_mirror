@@ -1,0 +1,65 @@
+<h2><%= l(:label_git_mirror_admin) %></h2>
+
+<div class="git-mirror-stats">
+  <span class="git-mirror-stat"><strong><%= @stats[:total] %></strong> total</span>
+  <span class="git-mirror-stat git-mirror-badge-success"><strong><%= @stats[:success] %></strong> ok</span>
+  <span class="git-mirror-stat git-mirror-badge-failed"><strong><%= @stats[:failed] %></strong> failed</span>
+  <span class="git-mirror-stat git-mirror-badge-running"><strong><%= @stats[:syncing] %></strong> syncing</span>
+  <span class="git-mirror-stat git-mirror-badge-stale"><strong><%= @stats[:stale] %></strong> stale</span>
+</div>
+
+<% if @configs.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <table class="list">
+    <thead>
+      <tr>
+        <th><%= l(:field_project) %></th>
+        <th><%= l(:label_repository) %></th>
+        <th><%= l(:label_remote_url) %></th>
+        <th><%= l(:label_auth_type) %></th>
+        <th><%= l(:label_poll_cron) %></th>
+        <th><%= l(:label_last_sync) %></th>
+        <th><%= l(:label_sync_status) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @configs.each do |config| %>
+        <% repo    = config.repository %>
+        <% project = repo&.project %>
+        <% status  = config.stale_sync? ? 'stale' : (config.syncing? ? 'running' : config.last_sync_status.to_s) %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td><%= project ? link_to(project.name, project_path(project)) : '—' %></td>
+          <td>
+            <% if repo && project %>
+              <%= link_to(repo.name, url_for(controller: 'repositories', action: 'show', id: project.identifier, repository_id: repo.identifier)) %>
+            <% else %>
+              —
+            <% end %>
+          </td>
+          <td><code class="git-mirror-url-truncated"><%= h config.remote_url %></code></td>
+          <td><%= l(:"label_auth_type_#{config.auth_type}", default: config.auth_type) %></td>
+          <td>
+            <% if config.poll_enabled? %>
+              <code><%= h config.poll_cron %></code>
+            <% else %>
+              <em>disabled</em>
+            <% end %>
+          </td>
+          <td>
+            <% if config.last_sync_at %>
+              <%= format_time(config.last_sync_at) %>
+            <% else %>
+              <%= l(:label_last_sync_never) %>
+            <% end %>
+          </td>
+          <td>
+            <span class="git-mirror-badge git-mirror-badge-<%= status %>">
+              <%= l(:"label_sync_status_#{status.presence || 'pending'}", default: status.humanize) %>
+            </span>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

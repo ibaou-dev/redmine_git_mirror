@@ -1,0 +1,12 @@
+<h2><%= l(:label_git_mirror_config) %></h2>
+<p><%= l(:text_are_you_sure) %></p>
+<p>
+  <%= l(:label_remote_url) %>: <strong><%= h @config.remote_url %></strong><br>
+  <%= l(:label_local_path) %>: <code><%= h @config.local_path %></code>
+</p>
+<p class="warning"><em>The local bare clone will be permanently deleted from disk.</em></p>
+
+<%= form_tag git_mirror_config_path(@project, @config), method: :delete do %>
+  <%= submit_tag l(:button_delete), class: 'button-negative' %>
+  <%= link_to l(:button_cancel), settings_project_path(@project, tab: 'git_mirror') %>
+<% end %>

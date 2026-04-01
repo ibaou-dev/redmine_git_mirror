@@ -1,0 +1,88 @@
+/* ===== redmine_git_mirror plugin styles ===== */
+
+.git-mirror-status-panel {
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+
+.git-mirror-status-panel h4 {
+  margin: 0 0 8px 0;
+  font-size: 1em;
+  color: #555;
+}
+
+.git-mirror-status-panel dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.git-mirror-status-panel dt { font-weight: bold; color: #666; }
+.git-mirror-status-panel dd { margin: 0; }
+
+.git-mirror-actions { margin-top: 10px; }
+
+/* Status badges */
+.git-mirror-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.git-mirror-badge-success, .git-mirror-badge-ok  { background: #d4edda; color: #155724; }
+.git-mirror-badge-failed                          { background: #f8d7da; color: #721c24; }
+.git-mirror-badge-running                         { background: #cce5ff; color: #004085; }
+.git-mirror-badge-pending                         { background: #fff3cd; color: #856404; }
+.git-mirror-badge-stale                           { background: #e2e3e5; color: #383d41; }
+
+.git-mirror-badge-trigger-scheduler  { background: #e2e3e5; color: #383d41; }
+.git-mirror-badge-trigger-webhook    { background: #cce5ff; color: #004085; }
+.git-mirror-badge-trigger-manual     { background: #fff3cd; color: #856404; }
+
+/* Output pre block */
+.git-mirror-output {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 12px 16px;
+  border-radius: 4px;
+  overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
+.git-mirror-error { color: #721c24; }
+
+/* Admin dashboard stats */
+.git-mirror-stats {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.git-mirror-stat {
+  padding: 6px 14px;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+/* Truncate long URLs in tables */
+.git-mirror-url-truncated {
+  display: inline-block;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}

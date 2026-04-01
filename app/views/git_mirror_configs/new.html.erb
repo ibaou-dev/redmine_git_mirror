@@ -1,0 +1,12 @@
+<h2><%= l(:label_git_mirror_new) %></h2>
+
+<%= form_for @config, url: git_mirror_configs_path(@project), html: { method: :post } do |f| %>
+  <%= render partial: 'form', locals: { f: f } %>
+  <% if @repository %>
+    <%= f.hidden_field :repository_id, value: @repository.id %>
+  <% end %>
+  <p>
+    <%= submit_tag l(:button_create) %>
+    <%= link_to l(:button_cancel), settings_project_path(@project, tab: 'git_mirror') %>
+  </p>
+<% end %>

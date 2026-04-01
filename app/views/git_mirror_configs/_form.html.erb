@@ -1,0 +1,122 @@
+<%= error_messages_for @config %>
+
+<div class="box tabular">
+  <p>
+    <label><%= l(:label_remote_url) %> <span class="required">*</span></label>
+    <%= f.text_field :remote_url, size: 60, placeholder: 'git@github.com:org/repo.git or https://github.com/org/repo.git' %>
+    <% unless f.object.new_record? %>
+      <em class="info"><%= l(:hint_remote_url_change) %></em>
+    <% end %>
+  </p>
+
+  <p>
+    <label><%= l(:label_auth_type) %></label>
+    <% GitMirrorConfig::AUTH_TYPES.each do |type| %>
+      <label class="inline">
+        <%= radio_button_tag 'git_mirror_config[auth_type]', type,
+              @config.auth_type == type,
+              class: 'git-mirror-auth-radio',
+              data: { type: type } %>
+        <%= l(:"label_auth_type_#{type}") %>
+      </label>
+      &nbsp;
+    <% end %>
+  </p>
+
+  <!-- SSH Key fields -->
+  <div id="git-mirror-auth-ssh_key" class="git-mirror-auth-section" style="display:none">
+    <p>
+      <label><%= l(:label_ssh_key_material) %></label>
+      <%= text_area_tag 'git_mirror_config[ssh_key_material]', '',
+            rows: 10, cols: 60,
+            placeholder: "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----" %>
+      <em class="info">Paste your private key. It will be stored on the filesystem, not in the database.</em>
+    </p>
+    <% if @config.ssh_key_filename.present? %>
+      <p>
+        <label><%= l(:label_ssh_key_fingerprint) %></label>
+        <code><%= h @config.ssh_key_filename %></code>
+        <em class="info">(Paste a new key above to replace)</em>
+      </p>
+    <% end %>
+  </div>
+
+  <!-- Token fields -->
+  <div id="git-mirror-auth-token" class="git-mirror-auth-section" style="display:none">
+    <p>
+      <label><%= l(:label_access_token) %></label>
+      <%= password_field_tag 'git_mirror_config[access_token]', '',
+            size: 60, autocomplete: 'new-password',
+            placeholder: 'Leave blank to keep existing token' %>
+    </p>
+  </div>
+
+  <!-- Username/password fields -->
+  <div id="git-mirror-auth-userpass" class="git-mirror-auth-section" style="display:none">
+    <p>
+      <label><%= l(:label_username) %></label>
+      <%= f.text_field :username, size: 40, autocomplete: 'off' %>
+    </p>
+    <p>
+      <label><%= l(:label_password) %></label>
+      <%= password_field_tag 'git_mirror_config[password]', '',
+            size: 40, autocomplete: 'new-password',
+            placeholder: 'Leave blank to keep existing password' %>
+    </p>
+  </div>
+
+  <hr>
+
+  <p>
+    <label><%= f.check_box :poll_enabled %> <%= l(:label_poll_enabled) %></label>
+  </p>
+  <p>
+    <label><%= l(:label_poll_cron) %></label>
+    <%= f.text_field :poll_cron, size: 20, placeholder: '*/15 * * * *' %>
+    <em class="info"><%= l(:label_poll_cron_hint) %></em>
+  </p>
+
+  <hr>
+
+  <p>
+    <label><%= f.check_box :webhook_enabled %> <%= l(:label_webhook_enabled) %></label>
+  </p>
+
+  <% if @config.persisted? && @config.webhook_enabled? %>
+    <p>
+      <label><%= l(:label_webhook_url) %></label>
+      <input type="text" value="<%= @config.webhook_url %>" size="80" readonly onclick="this.select()">
+      <em class="info"><%= l(:label_webhook_url_hint) %></em>
+    </p>
+    <p>
+      <label><%= l(:label_webhook_secret) %></label>
+      <%= password_field_tag 'git_mirror_config[webhook_secret_update]', '',
+            size: 40, autocomplete: 'new-password',
+            placeholder: 'Leave blank to keep existing secret' %>
+      &nbsp;
+      <label class="inline">
+        <%= check_box_tag 'git_mirror_config[regenerate_webhook_secret]', '1', false %>
+        <%= l(:label_regenerate_webhook_secret) %>
+      </label>
+    </p>
+  <% end %>
+</div>
+
+<%= javascript_tag do %>
+(function() {
+  function showAuthSection() {
+    document.querySelectorAll('.git-mirror-auth-section').forEach(function(el) {
+      el.style.display = 'none';
+    });
+    var selected = document.querySelector('.git-mirror-auth-radio:checked');
+    if (selected && selected.dataset.type !== 'none') {
+      var section = document.getElementById('git-mirror-auth-' + selected.dataset.type);
+      if (section) section.style.display = 'block';
+    }
+  }
+  document.querySelectorAll('.git-mirror-auth-radio').forEach(function(radio) {
+    radio.addEventListener('change', showAuthSection);
+  });
+  showAuthSection();
+})();
+<% end %>

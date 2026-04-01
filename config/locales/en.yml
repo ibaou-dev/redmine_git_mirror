@@ -1,0 +1,71 @@
+en:
+  project_module_redmine_git_mirror: "Git Mirror"
+
+  permission_view_git_mirror_sync_logs: "View Git mirror sync logs"
+  permission_manage_git_mirror: "Manage Git mirror configuration"
+
+  label_git_mirror: "Git Mirror"
+  label_git_mirror_config: "Mirror Configuration"
+  label_git_mirror_configs: "Mirror Configurations"
+  label_git_mirror_sync_log: "Sync Log"
+  label_git_mirror_sync_logs: "Sync Logs"
+  label_git_mirror_new: "Configure Mirror"
+  label_git_mirror_edit: "Edit Mirror Configuration"
+  label_git_mirror_admin: "Git Mirror Dashboard"
+
+  label_remote_url: "Remote URL"
+  label_auth_type: "Authentication Type"
+  label_auth_type_none: "None (public repo)"
+  label_auth_type_ssh_key: "SSH Private Key"
+  label_auth_type_token: "Access Token"
+  label_auth_type_userpass: "Username / Password"
+
+  label_ssh_key_material: "SSH Private Key (PEM)"
+  label_ssh_key_fingerprint: "Current SSH Key"
+  label_access_token: "Access Token"
+  label_username: "Username"
+  label_password: "Password"
+
+  label_poll_enabled: "Enable polling"
+  label_poll_cron: "Poll schedule (cron)"
+  label_poll_cron_hint: "e.g. */15 * * * * (every 15 minutes)"
+
+  label_webhook_enabled: "Enable webhook"
+  label_webhook_url: "Webhook URL"
+  label_webhook_url_hint: "Configure this URL in your Git host (GitHub, GitLab, Bitbucket)"
+  label_webhook_secret: "Webhook Secret"
+  label_regenerate_webhook_secret: "Regenerate webhook secret"
+
+  label_local_path: "Local mirror path"
+  label_last_sync: "Last synced"
+  label_last_sync_never: "Never"
+  label_sync_now: "Sync Now"
+  label_sync_status: "Sync Status"
+  label_sync_status_success: "Success"
+  label_sync_status_failed: "Failed"
+  label_sync_status_pending: "Pending"
+  label_sync_status_running: "Running"
+  label_sync_status_stale: "Stale"
+
+  label_trigger_type_scheduler: "Scheduler"
+  label_trigger_type_webhook: "Webhook"
+  label_trigger_type_manual: "Manual"
+
+  label_commits_fetched: "Commits fetched"
+  label_sync_duration: "Duration"
+  label_sync_output: "Git output"
+  label_sync_error: "Error"
+
+  label_git_mirror_base_dir: "Mirror base directory"
+  label_git_mirror_base_dir_hint: "Absolute path where bare Git clones are stored. Leave empty for default (<rails_root>/repositories/redmine_git_mirror)"
+
+  notice_git_mirror_created: "Mirror configuration saved. Initial sync has been queued."
+  notice_git_mirror_updated: "Mirror configuration updated."
+  notice_git_mirror_deleted: "Mirror configuration deleted."
+  notice_git_mirror_sync_queued: "Sync has been queued."
+
+  error_git_mirror_lock_held: "Another sync is already running for this repository."
+  error_git_mirror_disk_space: "Insufficient disk space for mirror operation."
+  error_git_mirror_invalid_path: "Invalid mirror path."
+
+  hint_remote_url_change: "Changing this URL will delete the local clone and trigger a fresh re-sync from scratch."
