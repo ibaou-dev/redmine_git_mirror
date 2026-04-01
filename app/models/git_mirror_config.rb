@@ -166,7 +166,7 @@ class GitMirrorConfig < ActiveRecord::Base
   def validate_cron_expression
     require 'rufus-scheduler'
     Rufus::Scheduler.parse(poll_cron)
-  rescue ArgumentError, Rufus::Scheduler::NotFound
+  rescue ArgumentError
     errors.add(:poll_cron, :invalid)
   end
 

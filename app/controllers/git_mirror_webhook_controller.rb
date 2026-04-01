@@ -25,12 +25,8 @@ class GitMirrorWebhookController < ApplicationController
     # Spawn background sync — respond immediately
     config_id = @config.id
     Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        cfg = GitMirrorConfig.find_by(id: config_id)
-        RedmineGitMirror::Services::MirrorSyncService
-          .new(cfg, trigger_type: 'webhook')
-          .call if cfg
-      end
+      cfg = ActiveRecord::Base.connection_pool.with_connection { GitMirrorConfig.find_by(id: config_id) }
+      RedmineGitMirror::Services::MirrorSyncService.new(cfg, trigger_type: 'webhook').call if cfg
     end
 
     render json: { status: 'queued' }, status: :ok

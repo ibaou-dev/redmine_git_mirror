@@ -63,7 +63,7 @@ module RedmineGitMirror
         # Schedule the periodic cleanup job (idempotent)
         unless instance.jobs(tag: 'git_mirror_cleanup').any?
           instance.cron(CLEANUP_CRON, tag: 'git_mirror_cleanup') do
-            GitMirrorWebhookDelivery.cleanup_old!
+            ActiveRecord::Base.connection_pool.with_connection { GitMirrorWebhookDelivery.cleanup_old! }
           rescue StandardError => e
             Rails.logger.error "[RedmineGitMirror::Scheduler] Cleanup error: #{e.message}"
           end
@@ -89,7 +89,9 @@ module RedmineGitMirror
       # Wraps a sync call with DB reload and error isolation.
       # Reloads the config from DB so we always use current credentials/settings.
       def safe_sync(config_id, trigger_type)
-        config = GitMirrorConfig.find_by(id: config_id)
+        config = ActiveRecord::Base.connection_pool.with_connection do
+          GitMirrorConfig.find_by(id: config_id)
+        end
         unless config
           Rails.logger.warn "[RedmineGitMirror::Scheduler] Config #{config_id} not found — skipping"
           return

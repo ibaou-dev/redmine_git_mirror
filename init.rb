@@ -19,7 +19,7 @@ Redmine::Plugin.register :redmine_git_mirror do
                { git_mirror_sync_logs: [:index, :show] },
                read: true
     permission :manage_git_mirror,
-               { git_mirror_configs: [:new, :create, :edit, :update, :destroy, :trigger_sync] },
+               { git_mirror_configs: [:new, :create, :edit, :update, :destroy, :confirm_destroy, :trigger_sync] },
                require: :member
   end
 

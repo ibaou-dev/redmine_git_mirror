@@ -18,9 +18,14 @@ Enhances Redmine's Git repository integration with:
 == Configuration
 
 1. Go to Administration > Plugins > Redmine Git Mirror > Configure
-2. Set the mirror base directory (optional, defaults to <redmine_root>/repositories/redmine_git_mirror)
-3. Enable the "Git Mirror" module in your project settings
-4. In Project Settings > Repositories, configure a Git repository, then click "Configure Mirror"
+2. Optionally set the mirror base directory (defaults to <redmine_root>/repositories/redmine_git_mirror)
+3. Enable the "Git Mirror" module in your project's module settings
+4. In Project Settings > Git Mirror, click "Add Mirror"
+5. Enter the remote URL and authentication details — a Git repository is created automatically
+6. The initial sync runs in the background; the repository browser becomes available once the first sync completes
+
+Note: If you already have an existing Redmine Git repository and want to add mirroring to
+it, use the "Configure Mirror" link on the repository's browse page instead.
 
 == Webhook Setup
 

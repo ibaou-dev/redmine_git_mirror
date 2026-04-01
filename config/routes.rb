@@ -12,6 +12,7 @@ RedmineApp::Application.routes.draw do
               only:        [:new, :create, :edit, :update, :destroy] do
       member do
         post :trigger_sync
+        get  :confirm_destroy
       end
     end
 

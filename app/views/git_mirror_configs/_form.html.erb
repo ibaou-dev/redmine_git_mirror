@@ -4,6 +4,9 @@
   <p>
     <label><%= l(:label_remote_url) %> <span class="required">*</span></label>
     <%= f.text_field :remote_url, size: 60, placeholder: 'git@github.com:org/repo.git or https://github.com/org/repo.git' %>
+    <% unless f.object.new_record? %>
+      <em class="info"><%= l(:hint_remote_url_change) %></em>
+    <% end %>
   </p>
 
   <p>

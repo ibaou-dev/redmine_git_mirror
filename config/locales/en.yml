@@ -67,3 +67,5 @@ en:
   error_git_mirror_lock_held: "Another sync is already running for this repository."
   error_git_mirror_disk_space: "Insufficient disk space for mirror operation."
   error_git_mirror_invalid_path: "Invalid mirror path."
+
+  hint_remote_url_change: "Changing this URL will delete the local clone and trigger a fresh re-sync from scratch."

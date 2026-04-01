@@ -90,8 +90,9 @@ The `redmine_git_mirror` plugin eliminates this burden by managing the full life
 
 **Consequences**:
 - Scheduler is **not started in test environment** (`next if Rails.env.test?` guard in `after_initialize`).
-- On **multi-worker Puma** deployments (N workers), N scheduler instances will fire — mitigated by the per-repo advisory lock (ADR-6).
+- On **multi-worker Puma** deployments (N workers), N scheduler instances will fire — mitigated by the per-repo file lock (ADR-6).
 - Memory overhead: one background thread per process, one `cron` job per enabled config.
+- **Connection management**: Background sync threads release their DB connection before git I/O and re-acquire it only for brief setup/teardown operations. This prevents long-running or hung git operations from exhausting the connection pool. Callers wrap only the initial config load in `with_connection`; `MirrorSyncService` manages its own connection lifecycle internally via explicit `connection_pool.with_connection` blocks.
 
 ---
 
@@ -141,13 +142,14 @@ Additionally, webhooks can be replayed by attackers to trigger unnecessary syncs
 
 **Context**: On Puma with multiple workers, each worker has its own Rufus-Scheduler instance. Multiple workers can fire the same cron job simultaneously. Additionally, a manual sync trigger could overlap with a scheduled sync.
 
-**Decision**: Per-repository DB advisory lock. For PostgreSQL: `pg_try_advisory_lock(<repository_id>)`. For MySQL/MariaDB: file lock at `tmp/redmine_git_mirror/locks/<repo_id>.lock` using `File::LOCK_EX | File::LOCK_NB`.
+**Decision**: Per-repository file lock at `tmp/redmine_git_mirror/locks/<repo_id>.lock` using `File::LOCK_EX | File::LOCK_NB`.
 
 A secondary `syncing` boolean flag in `git_mirror_configs` provides UI visibility (showing "Running" in the status badge) and a stale-lock recovery mechanism: if `syncing = true && sync_started_at < 1.hour.ago`, the next sync attempt resets the flag before proceeding.
 
 **Rationale**:
-- DB advisory locks are non-blocking (`pg_try_advisory_lock` returns immediately), do not require a transactions, and are automatically released if the process dies.
-- File locks provide equivalent semantics on non-PostgreSQL deployments.
+- File locks do not require holding a DB connection, making them compatible with the connection-release pattern in ADR-3. A DB advisory lock (`pg_try_advisory_lock`) is connection-scoped — releasing the connection mid-sync would also release the lock, making it incompatible with the desired architecture.
+- File locks are non-blocking (`LOCK_NB` returns immediately if held) and are automatically released if the process dies.
+- File locks are per-machine, which is adequate for a single-server deployment.
 - The `syncing` flag provides observability without being the source of truth for locking.
 
 ---
@@ -172,28 +174,29 @@ A secondary `syncing` boolean flag in `git_mirror_configs` provides UI visibilit
 ### Initial Setup
 
 ```
-User fills form (remote_url, auth_type, creds, poll_cron)
+User fills form (remote_url, auth_type, creds, poll_cron)   ← no pre-existing repo required
     │
     ▼
 GitMirrorConfigsController#create
-    │   Validates and saves GitMirrorConfig
-    │   Stores encrypted credentials
-    │   Generates webhook_token
-    │   Computes local_path
+    ├── Auto-creates Repository::Git (identifier derived from remote URL)
+    ├── Saves GitMirrorConfig (computes local_path from project+repo identifiers)
+    └── Sets Repository::Git.url = local_path (pre-set even before clone exists)
     │
     ▼ after_save callback
 Scheduler.schedule(config)          ← registers cron job
     │
     ▼ background Thread (initial sync)
 MirrorSyncService#call
-    ├── DiskGuard.check!
-    ├── acquire_lock
-    ├── GitMirrorSyncLog.create! (status: running)
-    ├── CredentialManager.git_env
-    ├── git clone --bare --mirror <remote_url> <local_path>
-    ├── repository.update_columns(url: local_path)
-    ├── repository.fetch_changesets       ← Redmine imports commits
-    └── GitMirrorSyncLog.complete! (status: success)
+    ├── [with_connection]  acquire file lock, GitMirrorSyncLog.create!, set syncing=true
+    │
+    ├── [NO DB CONNECTION HELD]
+    │   ├── DiskGuard.check!
+    │   ├── CredentialManager.git_env
+    │   └── git clone --bare --mirror <remote_url> <local_path>   (timeout: 600s)
+    │
+    ├── [with_connection]  repository.update_columns(url: local_path)
+    ├── [with_connection]  repository.fetch_changesets   ← Redmine imports commits
+    └── [with_connection]  GitMirrorSyncLog.complete!, config.update_columns(syncing: false)
 ```
 
 ### Scheduled Polling
@@ -246,7 +249,7 @@ GitMirrorWebhookController#receive
 | Path traversal (local_path) | Regex sanitize + prefix guard before mkdir/rm_rf |
 | Shell injection (git args) | All git calls use `Open3.capture3(*array)` — no shell expansion |
 | SSH injection | SSH key filenames validated as UUID regex before use |
-| Double sync | DB advisory lock + `syncing` flag with stale recovery |
+| Double sync | File lock (`LOCK_EX\|LOCK_NB`) + `syncing` flag with stale recovery |
 | Orphan cleanup | after_destroy removes SSH key file and local mirror |
 
 ---
@@ -256,5 +259,6 @@ GitMirrorWebhookController#receive
 - **No automatic re-clone on corruption**: If the local bare repo becomes corrupted, the operator must delete `local_path` manually; the next sync will detect the missing directory and clone fresh.
 - **Single remote per repository**: The plugin supports one remote URL per Redmine repository. Multiple remotes would require schema changes.
 - **No SSH host key management**: `StrictHostKeyChecking=no` is used for simplicity. A future enhancement should allow uploading known_hosts entries.
-- **Rufus-Scheduler on multi-worker**: The advisory lock mitigates double-sync but every worker carries a scheduler thread. A future enhancement could use a shared job queue (Solid Queue or a lightweight Redis-backed option).
+- **Rufus-Scheduler on multi-worker**: The file lock mitigates double-sync but every worker carries a scheduler thread. A future enhancement could use a shared job queue (Solid Queue or a lightweight Redis-backed option).
 - **No branch filter**: All branches and tags are fetched. A future enhancement could support `refspec` configuration.
+- **SSH keys lost on container restart**: Keys stored under `tmp/` are not persisted across container restarts unless the volume is mounted. Operators should mount `<rails_root>/tmp/redmine_git_mirror/` as a named volume when using SSH auth.

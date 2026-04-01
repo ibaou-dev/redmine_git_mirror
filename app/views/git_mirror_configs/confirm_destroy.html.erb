@@ -8,5 +8,5 @@
 
 <%= form_tag git_mirror_config_path(@project, @config), method: :delete do %>
   <%= submit_tag l(:button_delete), class: 'button-negative' %>
-  <%= link_to l(:button_cancel), settings_project_path(@project, tab: 'repositories') %>
+  <%= link_to l(:button_cancel), settings_project_path(@project, tab: 'git_mirror') %>
 <% end %>

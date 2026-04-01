@@ -61,11 +61,16 @@ module RedmineGitMirror
           raise ArgumentError, 'SSH key material contains null bytes'
         end
 
+        # Normalize CRLF → LF and ensure exactly one trailing newline.
+        # Browsers on Windows submit textarea content with \r\n; OpenSSH's
+        # libcrypto rejects keys that contain \r or that lack a trailing \n.
+        normalized = key_material.gsub(/\r\n?/, "\n").strip + "\n"
+
         filename = @config.ssh_key_filename.presence || SecureRandom.uuid
         path     = ssh_key_path(filename)
 
         FileUtils.mkdir_p(ssh_keys_dir, mode: 0o700)
-        File.write(path, key_material, perm: 0o600)
+        File.write(path, normalized, perm: 0o600)
         # Enforce permissions regardless of umask
         File.chmod(0o600, path)
 
