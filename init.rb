@@ -2,11 +2,11 @@ require 'redmine'
 
 Redmine::Plugin.register :redmine_git_mirror do
   name        'Redmine Git Mirror'
-  author      'Redmine Community'
+  author      'ibaou'
   description 'Automatic Git repository mirroring with credential management, polling, and webhook support'
   version     '1.0.0'
-  url         'https://github.com/redmine/redmine_git_mirror'
-  author_url  'https://www.redmine.org'
+  url         'https://github.com/ibaou-dev/redmine_git_mirror'
+  author_url  'https://github.com/ibaou-dev'
 
   requires_redmine version_or_higher: '5.0'
 
